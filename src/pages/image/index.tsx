@@ -1,34 +1,23 @@
-import { ChangeEvent, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Image() {
   const [amount, setAmount] = useState(0);
 
-  const fetchData = async (image: File) => {
-    const textAnnotations = await fetchImageLabels(image.name);
+  useEffect(() => {
+    const fetchData = async () => {
+      const imageUrl = 'receipt1.png';
+      const textAnnotations = await fetchImageLabels(imageUrl);
 
-    const detectedAmount = findAmount(textAnnotations);
+      const detectedAmount = findAmount(textAnnotations);
 
-    setAmount(detectedAmount);
-  };
+      setAmount(detectedAmount);
+    };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) {
-      return;
-    }
-
-    const image = event.target.files[0];
-
-    fetchData(image);
-  };
-    
+    fetchData();
+  }, []);
 
   return (
     <div>
-      <input 
-        type="file" 
-        accept="image/jpeg,image/png,image/gif,image/heif"
-        onChange={handleInputChange}
-      />
       <h1>Receipt Amount</h1>
       <p>{amount}</p>
     </div>
@@ -62,12 +51,14 @@ function findAmount(textAnnotations: any) {
     }
   });
 
+  console.log(amounts)
+
   // 가장 큰 금액을 반환합니다. 이것이 구매 총액일 가능성이 높습니다.
   return Math.max(...amounts);
 }
 
-// 앞 뒤의 \n, 공백을 제거하고, ,(컴마)를 제거합니다. 
 const getRefine = (str: string) => {
+
   const cleanedString = str.replace(/^\s+|\s+$|,/g, '').replace(/\n/g, '');
 
   return cleanedString;
